@@ -1,0 +1,32 @@
+/*
+jfxrt.jar!/com/sun/javafx/scene/control/skin/caspian/caspian.css
+*/
+
+.menu-item1 {
+    -fx-background-color: white;
+    -fx-padding: 0.333333em 0.41777em 0.333333em 0.41777em;
+}
+
+.menu-item1:focused {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+
+.menu-item1:focused > .label {
+    -fx-text-fill: black;
+}
+
+.menu-item2 {
+    -fx-background-color: lightgray;
+    -fx-padding: 0.333333em 0.41777em 0.333333em 0.41777em;
+    -fx-cursor: hand;
+}
+
+.menu-item2:focused {
+    -fx-background-color: gray;
+    -fx-text-fill: black;
+}
+
+.menu-item2:focused > .label {
+    -fx-text-fill: black;
+}
