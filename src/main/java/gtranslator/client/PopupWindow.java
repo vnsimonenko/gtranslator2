@@ -72,8 +72,12 @@ public class PopupWindow {
         copyMenuItem.getStyleClass().add("menu-item2");
         copyMenuItem.setOnAction(event -> {
             try {
-                ClipboardHelper.INSTANCE.copyTextToClipboard(
-                        webView.getEngine().getDocument().getTextContent());
+                if (webView.getEngine().documentProperty() != null
+                        && webView.getEngine().documentProperty().get() != null
+                        && webView.getEngine().documentProperty().get().getDocumentElement() != null) {
+                    ClipboardHelper.INSTANCE.copyTextToClipboard(
+                            webView.getEngine().documentProperty().get().getDocumentElement().getTextContent());
+                }
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
