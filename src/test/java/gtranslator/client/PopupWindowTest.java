@@ -12,8 +12,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.LinkedBlockingQueue;
 import javafx.application.Platform;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class PopupWindowTest {
     @Test
     public void demoPopup() throws Exception {

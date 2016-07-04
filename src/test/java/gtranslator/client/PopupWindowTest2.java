@@ -8,6 +8,7 @@ import gtranslator.domain.TranslateModel;
 import gtranslator.service.Translator;
 import java.math.BigDecimal;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -24,6 +25,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {Application.class, ApplicationConfig.class})
 @TestPropertySource(locations = "classpath:application.properties")

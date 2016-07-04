@@ -35,7 +35,7 @@ public class HtmlHelper {
 
     private static Point calculateSize(String text) {
         Font f = new Font("monospace", 0, 13);
-        double koef = 2.0 / 3.0;
+        double koef = 1.0 / 3.0;
         FontMetrics fm = SwingUtilities2.getFontMetrics(null, f);
         double h = Math.sqrt(fm.stringWidth(text) * fm.getHeight() * koef);
         double w = h / koef;

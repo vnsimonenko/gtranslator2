@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import javafx.application.Platform;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
 public class Application implements CommandLineRunner, PropertyChangeListener, ApplicationContextAware {
+    private static final Logger logger = Logger.getLogger(Application.class);
     private static ConfigurableApplicationContext context;
     /**
      * records events from different modules. observer.
@@ -92,8 +94,6 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
             srcLang = (Language) evt.getNewValue();
         } else if (Application.PropertySupport.Property.TRG_LANG.equalsEvent(evt)) {
             trgLang = (Language) evt.getNewValue();
-        } else if (Application.PropertySupport.Property.AMOUNT_VIEW_WORDS.equalsEvent(evt)) {
-            amountViewWords = (Integer) evt.getNewValue();
         } else if (Application.PropertySupport.Property.AM_PLAY.equalsEvent(evt)) {
             play(selectedText, (String) evt.getNewValue(), Phonetic.AM);
         } else if (Application.PropertySupport.Property.BR_PLAY.equalsEvent(evt)) {
@@ -102,6 +102,8 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
             autoPlayAm = (Boolean) evt.getNewValue();
         } else if (Application.PropertySupport.Property.BR_AUTO_PLAY.equalsEvent(evt)) {
             autoPlayBr = (Boolean) evt.getNewValue();
+        } else if (PropertySupport.Property.AMOUNT_VIEW_WORDS.equalsEvent(evt)) {
+            amountViewWords = (Integer) evt.getNewValue();
         }
     }
 
@@ -113,7 +115,7 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
         autoPlayAm = applicationSettings.isAutoPlayAm();
         autoPlayBr = applicationSettings.isAutoPlayBr();
         amountViewWords = applicationSettings.getAmountViewWords();
-        //start();
+        start();
     }
 
     @Override
@@ -158,7 +160,6 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
         toolApplication = ToolApplication.getInstance();
 
         final LinkedBlockingQueue<ClipboardHelper.ActionListener.ActionEvent> queue = new LinkedBlockingQueue<>();
-        //Translator translator = gtranslator.Application.getContext().getBean(Translator.class);
 
         ClipboardHelper.INSTANCE.addActionListener((event) -> queue.add(event));
 
@@ -182,67 +183,66 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
                         continue;
                     }
 
-                    translator.translate(selectedText, applicationSettings.getSrcLang(),
-                            applicationSettings.getTrgLang(), new Translator.Callback() {
-                                @Override
-                                public void onComplete(TranslateModel model) {
-                                    try {
-                                        if (!StringUtils.defaultString(selectedText, "").equals(model.getText())) {
-                                            return;
-                                        }
-
-                                        if (autoPlayAm || autoPlayBr) {
-                                            audioExecutor.execute(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    try {
-                                                        playAuto(model);
-                                                    } catch (UnsupportedEncodingException e) {
-                                                    }
-                                                }
-                                            });
-                                        }
-
-                                        if ("ivona".equalsIgnoreCase(model.getTag())) {
-                                            if (hasTranscriptions) return;
-                                        }
-                                        hasTranscriptions = !model.getTranscriptions().isEmpty();
-
-                                        final String html = HtmlHelper.toHtml(model, applicationSettings.getAmountViewWords());
-                                        Platform.runLater(() -> {
-                                            try {
-                                                if (!StringUtils.isBlank(event.getText())) {
-                                                    toolApplication.getPopupWindow().show(html, event.getX(), event.getY());
-                                                } else if (toolApplication.getPopupWindow().canHideWindow(event.getX(), event.getY(), event.getClickCount())) {
-                                                    toolApplication.getPopupWindow().hide();
-                                                }
-                                            } catch (Exception ex) {
-                                                ex.printStackTrace();
-                                            }
-                                        });
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+                    translator.translate(selectedText, srcLang, trgLang, new Translator.Callback() {
+                        @Override
+                        public void onComplete(TranslateModel model) {
+                            try {
+                                if (!StringUtils.defaultString(selectedText, "").equals(model.getText())) {
+                                    return;
                                 }
 
-                                @Override
-                                public void onFailure(Exception ex, String tag) {
-                                    ex.printStackTrace();
-                                    Platform.runLater(() -> {
-                                        if ("google".equalsIgnoreCase(tag)) {
-                                            TranslateModel model = new TranslateModel();
-                                            model.setText(ex.getMessage());
-                                            model.setLang(srcLang);
-                                            toolApplication.getPopupWindow().hide();
+                                if (autoPlayAm || autoPlayBr) {
+                                    audioExecutor.execute(new Runnable() {
+                                        @Override
+                                        public void run() {
                                             try {
-                                                model.addTranslation(Language.EN, "ERROR", ex.getMessage(), BigDecimal.ZERO);
-                                                toolApplication.getPopupWindow().show(HtmlHelper.toHtml(model, 0));
-                                            } catch (Exception ex2) {
+                                                playAuto(model);
+                                            } catch (UnsupportedEncodingException e) {
                                             }
                                         }
                                     });
                                 }
+
+                                if ("ivona".equalsIgnoreCase(model.getTag())) {
+                                    if (hasTranscriptions) return;
+                                }
+                                hasTranscriptions = !model.getTranscriptions().isEmpty();
+
+                                final String html = HtmlHelper.toHtml(model, amountViewWords);
+                                Platform.runLater(() -> {
+                                    try {
+                                        if (!StringUtils.isBlank(event.getText())) {
+                                            toolApplication.getPopupWindow().show(html, event.getX(), event.getY());
+                                        } else if (toolApplication.getPopupWindow().canHideWindow(event.getX(), event.getY(), event.getClickCount())) {
+                                            toolApplication.getPopupWindow().hide();
+                                        }
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Exception ex, String tag) {
+                            ex.printStackTrace();
+                            Platform.runLater(() -> {
+                                if ("google".equalsIgnoreCase(tag)) {
+                                    TranslateModel model = new TranslateModel();
+                                    model.setText(ex.getMessage());
+                                    model.setLang(srcLang);
+                                    toolApplication.getPopupWindow().hide();
+                                    try {
+                                        model.addTranslation(Language.EN, "ERROR", ex.getMessage(), BigDecimal.ZERO);
+                                        toolApplication.getPopupWindow().show(HtmlHelper.toHtml(model, 0));
+                                    } catch (Exception ex2) {
+                                    }
+                                }
                             });
+                        }
+                    });
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -291,7 +291,7 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error(ex);
         }
     }
 }

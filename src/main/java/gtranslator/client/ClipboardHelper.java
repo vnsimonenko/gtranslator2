@@ -18,6 +18,7 @@ import java.util.logging.LogManager;
 import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
@@ -41,6 +42,8 @@ public class ClipboardHelper implements PropertyChangeListener {
     private Clipboard copyClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     private Clipboard selClipboard = Toolkit.getDefaultToolkit().getSystemSelection();
     private String clipboardText;
+    private int lastX;
+    private int lastY;
 
     private ClipboardHelper() {
         try {
@@ -112,6 +115,22 @@ public class ClipboardHelper implements PropertyChangeListener {
                                 actionListener.textChanged(ActionListener.createActionEvent(null, x, y, clickCount));
                             }
                         } else {
+                            if (mode.get() == MODE.COPY) {
+                                clipData = selClipboard.getContents(null);
+                                if (clipData != null && clipData.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                                    text = clipData.getTransferData(DataFlavor.stringFlavor);
+                                    if (text == null || StringUtils.isBlank(text.toString())) {
+                                        for (ActionListener actionListener : actionListeners) {
+                                            actionListener.textChanged(ActionListener.createActionEvent(null, x, y, clickCount));
+                                        }
+                                    }
+                                } else {
+                                    for (ActionListener actionListener : actionListeners) {
+                                        actionListener.textChanged(ActionListener.createActionEvent(null, x, y, clickCount));
+                                    }
+                                }
+                                return;
+                            }
                             return;
                         }
                     }
@@ -223,7 +242,8 @@ public class ClipboardHelper implements PropertyChangeListener {
                 if (ctrl && c) {
                     SwingUtilities.invokeLater(() -> {
                         try {
-                            ClipboardHelper.INSTANCE.fireEventOnClipboardChanged(-1, -1, -1);
+                            ClipboardHelper.INSTANCE.fireEventOnClipboardChanged(
+                                    ClipboardHelper.INSTANCE.lastX, ClipboardHelper.INSTANCE.lastY, -1);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         } catch (UnsupportedFlavorException | NoSuchMethodException | ScriptException ex) {
@@ -254,6 +274,8 @@ public class ClipboardHelper implements PropertyChangeListener {
         public void nativeMouseReleased(NativeMouseEvent e) {
             SwingUtilities.invokeLater(() -> {
                 try {
+                    ClipboardHelper.INSTANCE.lastX = e.getX();
+                    ClipboardHelper.INSTANCE.lastY = e.getY();
                     ClipboardHelper.INSTANCE.fireEventOnClipboardChanged(e.getX(), e.getY(), e.getClickCount());
                 } catch (IOException e1) {
                     e1.printStackTrace();
@@ -263,5 +285,4 @@ public class ClipboardHelper implements PropertyChangeListener {
             });
         }
     }
-
 }

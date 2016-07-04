@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class JsonTransformerTest {
     @Test
-    public void test1() throws Exception {
+    public void test() throws Exception {
         TranslateModel model = new TranslateModel();
         model.setText("test");
         model.setLang(Language.EN);
