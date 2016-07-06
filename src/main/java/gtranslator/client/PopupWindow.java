@@ -1,26 +1,13 @@
 package gtranslator.client;
 
-import com.sun.deploy.config.JfxRuntime;
 import gtranslator.Application;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
-import javafx.embed.swing.SwingNode;
-import javafx.geometry.HPos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import netscape.javascript.JSException;
 import org.apache.log4j.Logger;
