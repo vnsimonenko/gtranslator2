@@ -206,7 +206,7 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
                                     });
                                 }
 
-                                if ("google".equalsIgnoreCase(model.getTag())) {
+                                if ("google".equalsIgnoreCase(model.getTag()) || !model.getTranslations().isEmpty()) {
                                     lastModel = model;
                                 }
                                 if ("ivona".equalsIgnoreCase(model.getTag())) {
