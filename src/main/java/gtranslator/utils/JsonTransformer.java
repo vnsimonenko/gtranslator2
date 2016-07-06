@@ -31,7 +31,8 @@ public class JsonTransformer {
     }
 
     public enum XSL {
-        TEXT("client/xsl/text.xsl"), WORD("client/xsl/word.xsl"), TRANSCRIPTION("client/xsl/trn.xsl");
+        TEXT("client/xsl/text.xsl"), WORD("client/xsl/word.xsl"), TRANSCRIPTION("client/xsl/trn.xsl"),
+        CLIPBOARD_TEXT("client/xsl/clipboard_text.xsl"), CLIPBOARD_WORD("client/xsl/clipboard_word.xsl");
 
         XSL(String fname) {
             this.fname = fname;

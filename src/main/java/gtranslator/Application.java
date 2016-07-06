@@ -56,6 +56,7 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
     private volatile String selectedText;
     private boolean hasTranscriptions;
     private volatile String lastAutoPlayText;
+    private volatile TranslateModel lastModel;
     private ExecutorService audioExecutor = Executors.newSingleThreadExecutor();
 
     @Autowired
@@ -104,6 +105,8 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
             autoPlayBr = (Boolean) evt.getNewValue();
         } else if (PropertySupport.Property.AMOUNT_VIEW_WORDS.equalsEvent(evt)) {
             amountViewWords = (Integer) evt.getNewValue();
+        } else if (PropertySupport.Property.COPY_TO_CLIPBOARD.equalsEvent(evt)) {
+            copyToClipboard((String) evt.getNewValue());
         }
     }
 
@@ -148,7 +151,7 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
 
         public enum Property {
             SRC_LANG, TRG_LANG, AMOUNT_VIEW_WORDS, AMOUNT_CHARS, ACTIVE, EXIT, HISTORY,
-            MODE, AM_AUTO_PLAY, BR_AUTO_PLAY, AM_PLAY, BR_PLAY;
+            MODE, AM_AUTO_PLAY, BR_AUTO_PLAY, AM_PLAY, BR_PLAY, COPY_TO_CLIPBOARD;
 
             public boolean equalsEvent(PropertyChangeEvent evt) {
                 return name().equals(evt.getPropertyName());
@@ -203,6 +206,9 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
                                     });
                                 }
 
+                                if ("google".equalsIgnoreCase(model.getTag())) {
+                                    lastModel = model;
+                                }
                                 if ("ivona".equalsIgnoreCase(model.getTag())) {
                                     if (hasTranscriptions) return;
                                 }
@@ -292,6 +298,21 @@ public class Application implements CommandLineRunner, PropertyChangeListener, A
             }
         } catch (Exception ex) {
             logger.error(ex);
+        }
+    }
+
+    private void copyToClipboard(String html) {
+        String text = null;
+        if (lastModel != null) {
+            try {
+                text = HtmlHelper.toText(lastModel, amountViewWords);
+            } catch (Exception ex) {
+                logger.error(ex);
+            }
+        }
+        if (!StringUtils.isBlank(text) || !StringUtils.isBlank(html)) {
+            ClipboardHelper.INSTANCE.copyTextToClipboard(StringUtils.isBlank(text)
+                    ? html : text);
         }
     }
 }

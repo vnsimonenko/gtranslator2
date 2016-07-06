@@ -33,6 +33,18 @@ public class HtmlHelper {
                 isText ? JsonTransformer.XSL.TEXT : JsonTransformer.XSL.WORD);
     }
 
+    public static String toText(TranslateModel model, int maxCount) throws Exception {
+        String text = StringUtils.defaultString(model.getText(), "").trim();
+        boolean isText = text.split("[ ]").length > 1;
+        JsonObject jsonObject = model.toJson(isText
+                ? EnumSet.of(TranslateModel.Fields.TRANSLATIONS)
+                : EnumSet.of(TranslateModel.Fields.TRANSLATIONS, TranslateModel.Fields.TRANSCRIPTIONS));
+        JsonTransformer transformer = JsonTransformer.createJsonTransformer();
+        transformer.setMaxCount(maxCount);
+        return transformer.convertJsonToHtml(jsonObject.toString(),
+                isText ? JsonTransformer.XSL.CLIPBOARD_TEXT : JsonTransformer.XSL.CLIPBOARD_WORD);
+    }
+
     private static Point calculateSize(String text) {
         Font f = new Font("monospace", 0, 13);
         double koef = 1.0 / 3.0;

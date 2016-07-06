@@ -67,6 +67,10 @@
                 </style>
                 <table cellpadding="0" cellspacing="0"
                        style="font-family: '{$font-family}';font-size:small" width="{$width-px}" height="{$height-px}">
+                    <tr bgcolor="lightgray">
+                        <td align="left"><a id="close_mi" style="cursor: hand">close</a></td>
+                        <td align="left"><a id="copy_mi" style="cursor: hand">copy</a></td>
+                    </tr>
                     <!-- select languages. key=language -->
                     <xsl:for-each select="$document-json/xfn:map//xfn:map[@key='translations']/xfn:map[@key]">
                         <xsl:sort select="@key"/>
@@ -130,7 +134,11 @@
                 </table>
             </xsl:when>
             <xsl:otherwise>
-                <table style="margin-left: auto;margin-right: auto;" height="30px" width="55px"><tr><td align="center"><img id="loading"></img></td></tr></table>
+                <table style="margin-left: auto;margin-right: auto;font-family: '{$font-family}';font-size:small"
+                       height="30px" width="55px">
+                    <tr bgcolor="lightgray"><td align="center"><a id="close_mi" style="cursor: hand">close</a></td></tr>
+                    <tr><td align="center"><img id="loading"></img></td></tr>
+                </table>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>

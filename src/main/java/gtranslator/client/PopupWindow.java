@@ -1,14 +1,26 @@
 package gtranslator.client;
 
+import com.sun.deploy.config.JfxRuntime;
 import gtranslator.Application;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
+import javafx.embed.swing.SwingNode;
+import javafx.geometry.HPos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import netscape.javascript.JSException;
 import org.apache.log4j.Logger;
@@ -58,6 +70,26 @@ public class PopupWindow {
                                 }
                             }, false);
                         }
+                        final com.sun.webkit.dom.HTMLElementImpl closeMenuItem = elh.getElementById("close_mi");
+                        if (closeMenuItem != null) {
+                            elh.addEventListener("close_mi", "click", evt -> {
+                                contextMenu.hide();
+                            }, false);
+                        }
+                        final com.sun.webkit.dom.HTMLElementImpl copyMenuItem = elh.getElementById("copy_mi");
+                        if (copyMenuItem != null) {
+                            elh.addEventListener("copy_mi", "click", evt -> {
+                                try {
+                                    gtranslator.Application.PROPERTYSUPPORT.firePropertyChange(
+                                            Application.PropertySupport.Property.COPY_TO_CLIPBOARD,
+                                            0, (webView.getEngine().documentProperty().get())
+                                                    .getDocumentElement().getTextContent());
+                                } catch (Exception ex) {
+                                    logger.error(ex.getMessage(), ex);
+                                }
+                                contextMenu.hide();
+                            }, false);
+                        }
                     }
                 });
         contextMenu = new ContextMenu() {
@@ -67,22 +99,6 @@ public class PopupWindow {
 //                super.hide();
 //            }
         };
-
-        MenuItem copyMenuItem = new MenuItem("copy-close");
-        copyMenuItem.getStyleClass().add("menu-item2");
-        copyMenuItem.setOnAction(event -> {
-            try {
-                if (webView.getEngine().documentProperty() != null
-                        && webView.getEngine().documentProperty().get() != null
-                        && webView.getEngine().documentProperty().get().getDocumentElement() != null) {
-                    ClipboardHelper.INSTANCE.copyTextToClipboard(
-                            webView.getEngine().documentProperty().get().getDocumentElement().getTextContent());
-                }
-            } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-        });
-        contextMenu.getItems().add(copyMenuItem);
 
         CustomMenuItem webMenuItem = new CustomMenuItem(webView);
         webMenuItem.getStyleClass().clear();
